@@ -12,7 +12,7 @@ class Driver():
         self._x_bot.usePunish()
         self._o_bot = Bot()
         self._turn = True
-        self._wins = {0:0, 1:0, 2:0}
+        self._wins = [0,0,0]
 
     def resetGame(self):
         self._game.reset()
@@ -84,6 +84,8 @@ class Driver():
         return bot.pickMove(self._game.getBoardState())
 
     def showEndResults(self):
+        totalGames = sum(self._wins)
+        print("Total Games: %d" % (totalGames,))
         print("Draws: %d\nX Wins: %d\nO Wins: %d" % (self._wins[0],
                                                      self._wins[1],
                                                      self._wins[2]))
