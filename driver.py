@@ -6,11 +6,16 @@ from bot import Bot
 class Driver():
 
     def __init__(self):
+        
         self._game = Board()
+        
         self._x_bot = Bot()
+        self._o_bot = Bot()
         self._x_bot.useReward()
         self._x_bot.usePunish()
-        self._o_bot = Bot()
+        self._o_bot.useReward()
+        self._x_bot.usePunish()
+
         self._turn = True
         self._wins = [0,0,0]
 
@@ -85,17 +90,20 @@ class Driver():
 
     def showEndResults(self):
         totalGames = sum(self._wins)
+        def calculatePercent(i):
+            return (i / totalGames) * 100
         print("Total Games: %d" % (totalGames,))
-        print("Draws: %d\nX Wins: %d\nO Wins: %d" % (self._wins[0],
-                                                     self._wins[1],
-                                                     self._wins[2]))
+        labels = ["Draws","X Wins","O Wins"]
+        for x in range(3):
+            print("%-6s: %2d%% - %d" % (labels[x],
+                                      calculatePercent(self._wins[x]),
+                                      self._wins[x]))
 
 def main():
     d = Driver()
-    for i in range(1000000):
+    for i in range(100000):
         d.gameLoop(True)
         d.handleGameEnd(True)
-        #if i % 1000 == 0: print(len(d._x_bot._brain))
         d.resetGame()
     d.showEndResults()
 
