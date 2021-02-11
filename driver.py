@@ -1,7 +1,22 @@
 
-import random
+import random, pickle, time
+from enum import Enum
 from board import Board
 from bot import Bot
+
+class PlayerOptions(Enum):
+    HUMAN  = 1
+    BOT    = 2
+    RANDOM = 3
+
+# Control Flags
+SILENT = False
+PLAYER_X = PlayerOptions.HUMAN
+PLAYER_O = PlayerOptions.BOT
+GAMES = 100000
+LOAD_PRETRAINED = True
+SAVE_TRAINING = False
+BOT_MOVE_DELAY = 1
 
 class Driver():
 
@@ -21,10 +36,11 @@ class Driver():
 
     def resetGame(self):
         self._game.reset()
+        self._turn = True
 
     def gameLoop(self, silent=False):
         
-        if not silent: print(self._game)
+        if not silent: print(self._game, end="\n\n")
 
         while not self._game.isGameOver():
 
@@ -33,11 +49,23 @@ class Driver():
             if not silent: print("%s's Turn:" % (mark,))
 
             if mark == "X":
-                #move = self.getPlayerMove()
-                move = self.getBotMove(self._x_bot)
+                if PLAYER_X == PlayerOptions.HUMAN:
+                    move = self.getPlayerMove()
+                elif PLAYER_X == PlayerOptions.BOT:
+                    move = self.getBotMove(self._x_bot)
+                    time.sleep(BOT_MOVE_DELAY)
+                elif PLAYER_X == PlayerOptions.RANDOM:
+                    move = self.getRandomMachineMove()
+                    time.sleep(BOT_MOVE_DELAY)
             else:
-                #move = self.getRandomMachineMove()
-                move = self.getBotMove(self._o_bot)
+                if PLAYER_O == PlayerOptions.HUMAN:
+                    move = self.getPlayerMove()
+                elif PLAYER_O == PlayerOptions.BOT:
+                    move = self.getBotMove(self._o_bot)
+                    time.sleep(BOT_MOVE_DELAY)
+                elif PLAYER_O == PlayerOptions.RANDOM:
+                    move = self.getRandomMachineMove()
+                    time.sleep(BOT_MOVE_DELAY)
 
             # Carry out the move
             if move == None: break
@@ -46,7 +74,7 @@ class Driver():
             # Alternate turns
             self._turn = not self._turn
 
-            if not silent: print(self._game)
+            if not silent: print(self._game, end="\n\n")
             
     def handleGameEnd(self, silent=False):
         winner = self._game.getWinner()
@@ -97,16 +125,37 @@ class Driver():
         labels = ["Draws","X Wins","O Wins"]
         for x in range(3):
             print("%-6s: %2d%% - %d" % (labels[x],
-                                      calculatePercent(self._wins[x]),
-                                      self._wins[x]))
+                                        calculatePercent(self._wins[x]),
+                                        self._wins[x]))
+
+    def saveBots(self):
+        pickle.dump(self._x_bot, open("x.bot", "wb" ))
+        pickle.dump(self._o_bot, open("o.bot", "wb" ))
+
+    def loadBots(self):
+        self._x_bot = pickle.load(open("x.bot", "rb" ))
+        self._o_bot = pickle.load(open("o.bot", "rb" ))
+
+    def getXBot(self):
+        return self._x_bot
+
+    def getOBot(self):
+        return self._o_bot
+
+
 
 def main():
     d = Driver()
-    for i in range(100000):
-        d.gameLoop(True)
-        d.handleGameEnd(True)
+    if LOAD_PRETRAINED:
+        d.loadBots()
+    for _ in range(GAMES):
+        d.gameLoop(SILENT)
+        d.handleGameEnd(SILENT)
         d.resetGame()
+        print("\n" + "-"*20 + "\n")
     d.showEndResults()
+    if SAVE_TRAINING:
+        d.saveBots()
 
 if __name__ == "__main__":
     main()
