@@ -11,10 +11,10 @@ class Driver():
         
         self._x_bot = Bot()
         self._o_bot = Bot()
-        self._x_bot.useReward()
+        #self._x_bot.useReward()
         self._x_bot.usePunish()
-        self._o_bot.useReward()
-        self._x_bot.usePunish()
+        #self._o_bot.useReward()
+        self._o_bot.usePunish()
 
         self._turn = True
         self._wins = [0,0,0]
@@ -55,8 +55,9 @@ class Driver():
         self._wins[winner] += 1
 
     def executeLearning(self, winner):
-        self._x_bot.learn(winner==1)
-        #self._o_bot.learn(winner==2)
+        self._x_bot.learn(winner==1 or winner==0)
+        self._o_bot.learn(winner==2 or winner==0)
+        #print(len(self._o_bot._brain))
 
     def showResults(self, winner):
         if winner ==  0:

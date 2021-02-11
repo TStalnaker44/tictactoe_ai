@@ -16,6 +16,8 @@ class Bot():
         self._lastMove = None
         self._moveMemory = []
 
+        self._losingState = False
+
         self._reward = False
         self._punish = False
 
@@ -35,9 +37,11 @@ class Bot():
         if possibleMoves == []:
             # Hope opponent doesn't play perfectly
             # and make a random move
+            self._losingState = True
             possibleMoves = self.getMoves(state)
         move = random.choice(possibleMoves)
-        self._lastMove = (state, move)
+        if not self._losingState:
+            self._lastMove = (state, move)
         return move
 
     def learn(self, won):
@@ -51,6 +55,7 @@ class Bot():
                 if self._punish:
                     if move in self._brain[state]:
                         self._brain[state].remove(move)
+        self._losingState = False
 
     def getMoves(self, state):
         moves = []
