@@ -11,7 +11,7 @@ class PlayerOptions(Enum):
 # Game Control Variables
 PLAYER_X = PlayerOptions.HUMAN
 PLAYER_O = PlayerOptions.BOT
-GAMES = 1000
+GAMES = 1
 BOT_MOVE_DELAY = .5 #Cannot be 0
 LOAD_PRETRAINED = False
 SAVE_TRAINING = False
@@ -121,11 +121,15 @@ class Game():
             if not self._turn and PLAYER_O != PlayerOptions.HUMAN:
                 self.handleAiTurn(PLAYER_O, ticks)
         else:
-            if self._gamesPlayed < GAMES:
+            
+            if self._gamesPlayed < GAMES-1:
                 if self._resetTimer <= 0:
                     self.handleGameEnd()
+                    self.resetGame()
                 else:
                     self._resetTimer -= ticks
+            elif self._gamesPlayed < GAMES:
+                self.handleGameEnd()
             elif not self._saved and SAVE_TRAINING:
                 self.saveBots()
                 self._saved = True
@@ -150,7 +154,6 @@ class Game():
         self.executeLearning(winner)
         self._wins[winner] += 1
         self._gamesPlayed += 1
-        self.resetGame()
         self._stats.update()
         self._resetTimer = TIME_BETWEEN_GAMES
 
@@ -264,6 +267,7 @@ class StatsDisplay():
         # Format Turn
         mark = "X" if self._game._turn else "O"
         text = ("Waiting for %s to move..." % (mark,))
+        text = text if self._game._gamesPlayed != GAMES else "Match Over"
         self._turn = self._font.render(text, True, (0,0,0))
 
         # Format Total Games Played
