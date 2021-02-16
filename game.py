@@ -112,7 +112,6 @@ class Game():
 
     def update(self):
         ticks = self._gameClock.get_time() / 1000
-
         if not self._board.isGameOver():
             if self._turn and PLAYER_X != PlayerOptions.HUMAN:
                 self.handleAiTurn(PLAYER_X, ticks)                
@@ -126,12 +125,17 @@ class Game():
                     self._resetTimer -= ticks
 
     def handlePlayerMove(self, event):
+        top = TOP_MARGIN
+        bottom = TOP_MARGIN + (3 * (TILE_WIDTH + (2*LINE_WEIGHT)))
+        left = BOARD_MARGIN
+        right = BOARD_MARGIN + (3 * (TILE_WIDTH + (2*LINE_WEIGHT)))
         if event.type == pygame.MOUSEBUTTONDOWN and \
            event.button == 1:
-            if event.pos[1] and event.pos[0]
+            if top < event.pos[1] < bottom and \
+               left < event.pos[0] < right:
                 x, y = event.pos
-                column = (x - 10)  // TILE_WIDTH
-                row = (y - 10) // TILE_WIDTH
+                column = (x - BOARD_MARGIN)  // TILE_WIDTH
+                row = (y - TOP_MARGIN) // TILE_WIDTH
                 if self._board.isFreeSpace((row, column)):
                     self.executeMove((row, column))      
 
@@ -179,7 +183,7 @@ class Game():
             for j in range(3):
                 x = (TILE_WIDTH * (j)) + BOARD_MARGIN
                 y = (TILE_WIDTH * (i)) + TOP_MARGIN
-                mark = self._board._board[j][i]
+                mark = self._board._board[i][j]
                 tiles.append(BoardTile((x,y), mark))
         self._tiles = tiles
 
