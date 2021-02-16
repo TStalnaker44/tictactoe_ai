@@ -13,10 +13,11 @@ PLAYER_X = PlayerOptions.HUMAN
 PLAYER_O = PlayerOptions.BOT
 GAMES = 1000
 BOT_MOVE_DELAY = .5 #Cannot be 0
-LOAD_PRETRAINED = True
+LOAD_PRETRAINED = False
+SAVE_TRAINING = False
 
 # Board Display Variables
-BOARD_MARGIN = 100
+BOARD_MARGIN = 75
 TOP_MARGIN = 50
 TILE_WIDTH = 150
 LINE_WEIGHT = 2
@@ -67,6 +68,8 @@ class Game():
         # Create board tiles for display
         self.makeBoard()
         self._stats = StatsDisplay(self)
+
+        self._saved = False
 
         self._running = True
 
@@ -123,6 +126,9 @@ class Game():
                     self.handleGameEnd()
                 else:
                     self._resetTimer -= ticks
+            elif not self._saved and SAVE_TRAINING:
+                self.saveBots()
+                self._saved = True
 
     def handlePlayerMove(self, event):
         top = TOP_MARGIN
@@ -144,8 +150,8 @@ class Game():
         self.executeLearning(winner)
         self._wins[winner] += 1
         self._gamesPlayed += 1
-        self._stats.update()
         self.resetGame()
+        self._stats.update()
         self._resetTimer = TIME_BETWEEN_GAMES
 
     def executeLearning(self, winner):
@@ -176,6 +182,7 @@ class Game():
         self._board.executeMove(move, mark)
         self.makeBoard()
         self._turn = not self._turn
+        self._stats.update()
 
     def makeBoard(self):
         tiles = []
@@ -220,12 +227,16 @@ class StatsDisplay():
 
     def __init__(self, game):
 
-        self._font = pygame.font.SysFont("Times New Roman", 20)
+        self._font = pygame.font.SysFont("Times New Roman", 18)
         self._game = game
         self._top = (TILE_WIDTH+(2*LINE_WEIGHT)) * 3 + TOP_MARGIN
         self.update()
 
     def draw(self, screen):
+
+        # Draw Current Turn
+        x = (screen.get_width() // 2) - (self._turn.get_width() // 2)
+        screen.blit(self._turn, (x, TOP_MARGIN//2))
 
         # Draw Total Games Played
         x = (screen.get_width() // 2) - (self._played.get_width() // 2)
@@ -233,22 +244,27 @@ class StatsDisplay():
 
         # Draw X's Wins
         x = (screen.get_width() // 2) - (self._xwins.get_width() // 2)
-        y = self._top + self._played.get_height() + 5
+        y = self._top + self._played.get_height()+1
         screen.blit(self._xwins, (x, y))
 
         # Draw O's Wins
         x = (screen.get_width() // 2) - (self._owins.get_width() // 2)
-        y += self._xwins.get_height() + 5
+        y += self._xwins.get_height()+1
         screen.blit(self._owins, (x, y))
 
         # Draw the draws
         x = (screen.get_width() // 2) - (self._draws.get_width() // 2)
-        y += self._owins.get_height() + 5
+        y += self._owins.get_height()+1
         screen.blit(self._draws, (x, y))
 
     def update(self):
 
         total = max(1, self._game._gamesPlayed)
+
+        # Format Turn
+        mark = "X" if self._game._turn else "O"
+        text = ("Waiting for %s to move..." % (mark,))
+        self._turn = self._font.render(text, True, (0,0,0))
 
         # Format Total Games Played
         text = ("Games Played: %d" % (self._game._gamesPlayed,))
@@ -268,7 +284,6 @@ class StatsDisplay():
         text = ("Draws: %d - %.2f%%" % (self._game._wins[0],
                                       (self._game._wins[0]/total)*100))
         self._draws = self._font.render(text, True, (0,0,0))
-
 
 def main():
     game = Game()
