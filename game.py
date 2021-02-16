@@ -126,10 +126,12 @@ class Game():
                 if self._resetTimer <= 0:
                     self.handleGameEnd()
                     self.resetGame()
+                    self._stats.update()
                 else:
                     self._resetTimer -= ticks
             elif self._gamesPlayed < GAMES:
                 self.handleGameEnd()
+                self._stats.update()
             elif not self._saved and SAVE_TRAINING:
                 self.saveBots()
                 self._saved = True
@@ -154,7 +156,6 @@ class Game():
         self.executeLearning(winner)
         self._wins[winner] += 1
         self._gamesPlayed += 1
-        self._stats.update()
         self._resetTimer = TIME_BETWEEN_GAMES
 
     def executeLearning(self, winner):
