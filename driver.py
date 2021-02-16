@@ -11,7 +11,7 @@ class PlayerOptions(Enum):
 
 # Control Flags
 SILENT = True
-PLAYER_X = PlayerOptions.BOT
+PLAYER_X = PlayerOptions.RANDOM
 PLAYER_O = PlayerOptions.BOT
 GAMES = 100000
 LOAD_PRETRAINED = True

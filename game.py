@@ -9,10 +9,10 @@ class PlayerOptions(Enum):
     RANDOM = 3
 
 # Game Control Variables
-PLAYER_X = PlayerOptions.BOT
+PLAYER_X = PlayerOptions.HUMAN
 PLAYER_O = PlayerOptions.BOT
 GAMES = 1000
-BOT_MOVE_DELAY = 1
+BOT_MOVE_DELAY = .5 #Cannot be 0
 LOAD_PRETRAINED = True
 
 # Board Display Variables
@@ -20,7 +20,7 @@ BOARD_MARGIN = 100
 TOP_MARGIN = 50
 TILE_WIDTH = 150
 LINE_WEIGHT = 2
-TIME_BETWEEN_GAMES = 1
+TIME_BETWEEN_GAMES = .5 #Cannot be 0
 
 class Game():
 
@@ -124,6 +124,16 @@ class Game():
                     self.handleGameEnd()
                 else:
                     self._resetTimer -= ticks
+
+    def handlePlayerMove(self, event):
+        if event.type == pygame.MOUSEBUTTONDOWN and \
+           event.button == 1:
+            if event.pos[1] and event.pos[0]
+                x, y = event.pos
+                column = (x - 10)  // TILE_WIDTH
+                row = (y - 10) // TILE_WIDTH
+                if self._board.isFreeSpace((row, column)):
+                    self.executeMove((row, column))      
 
     def handleGameEnd(self):
         winner = self._board.getWinner()
