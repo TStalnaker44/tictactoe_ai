@@ -10,13 +10,13 @@ class PlayerOptions(Enum):
     RANDOM = 3
 
 # Control Flags
-SILENT = False
-PLAYER_X = PlayerOptions.HUMAN
+SILENT = True
+PLAYER_X = PlayerOptions.BOT
 PLAYER_O = PlayerOptions.BOT
 GAMES = 100000
 LOAD_PRETRAINED = True
-SAVE_TRAINING = False
-BOT_MOVE_DELAY = 1
+SAVE_TRAINING = True
+BOT_MOVE_DELAY = 0
 
 class Driver():
 
@@ -152,7 +152,8 @@ def main():
         d.gameLoop(SILENT)
         d.handleGameEnd(SILENT)
         d.resetGame()
-        print("\n" + "-"*20 + "\n")
+        if not SILENT:
+            print("\n" + "-"*20 + "\n")
     d.showEndResults()
     if SAVE_TRAINING:
         d.saveBots()

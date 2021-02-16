@@ -1,4 +1,4 @@
-import pygame, random
+import pygame, random, pickle
 from enum import Enum
 from board import Board
 from bot import Bot
@@ -8,16 +8,19 @@ class PlayerOptions(Enum):
     BOT    = 2
     RANDOM = 3
 
+# Game Control Variables
 PLAYER_X = PlayerOptions.BOT
 PLAYER_O = PlayerOptions.BOT
+GAMES = 1000
 BOT_MOVE_DELAY = 1
+LOAD_PRETRAINED = True
 
 # Board Display Variables
 BOARD_MARGIN = 100
 TOP_MARGIN = 50
 TILE_WIDTH = 150
 LINE_WEIGHT = 2
-TIME_BETWEEN_GAMES = 2
+TIME_BETWEEN_GAMES = 1
 
 class Game():
 
@@ -47,8 +50,14 @@ class Game():
 
         # Set up game objects
         self._board = Board()
-        self._x_bot = Bot()
-        self._o_bot = Bot()
+
+        if LOAD_PRETRAINED:
+            self.loadBots()
+        else:
+            self._x_bot = Bot()
+            self._o_bot = Bot()
+            self._x_bot.usePunish()
+            self._o_bot.usePunish()
 
         self._turn = True
 
@@ -61,6 +70,13 @@ class Game():
 
         self._running = True
 
+    def saveBots(self):
+        pickle.dump(self._x_bot, open("x.bot", "wb" ))
+        pickle.dump(self._o_bot, open("o.bot", "wb" ))
+
+    def loadBots(self):
+        self._x_bot = pickle.load(open("x.bot", "rb" ))
+        self._o_bot = pickle.load(open("o.bot", "rb" ))
 
     def gameLoop(self):
         while self._running:
@@ -103,18 +119,24 @@ class Game():
             if not self._turn and PLAYER_O != PlayerOptions.HUMAN:
                 self.handleAiTurn(PLAYER_O, ticks)
         else:
-            if self._resetTimer <= 0:
-                self.handleGameEnd()
-            else:
-                self._resetTimer -= ticks
+            if self._gamesPlayed < GAMES:
+                if self._resetTimer <= 0:
+                    self.handleGameEnd()
+                else:
+                    self._resetTimer -= ticks
 
     def handleGameEnd(self):
         winner = self._board.getWinner()
+        self.executeLearning(winner)
         self._wins[winner] += 1
         self._gamesPlayed += 1
         self._stats.update()
         self.resetGame()
         self._resetTimer = TIME_BETWEEN_GAMES
+
+    def executeLearning(self, winner):
+        self._x_bot.learn(winner==1 or winner==0)
+        self._o_bot.learn(winner==2 or winner==0)
                 
     def resetGame(self):
         self._board.reset()
@@ -126,7 +148,10 @@ class Game():
             if player == PlayerOptions.RANDOM:
                 move = self.getRandomMove()
             if player == PlayerOptions.BOT:
-                move = self.getBotMove(self._o_bot)
+                if self._turn:
+                    move = self.getBotMove(self._x_bot)
+                else:
+                    move = self.getBotMove(self._o_bot)
             self.executeMove(move)
             self._moveTimer = BOT_MOVE_DELAY
         else:
