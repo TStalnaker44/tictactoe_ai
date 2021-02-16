@@ -9,10 +9,10 @@ class PlayerOptions(Enum):
     RANDOM = 3
 
 # Game Control Variables
-PLAYER_X = PlayerOptions.HUMAN
+PLAYER_X = PlayerOptions.BOT
 PLAYER_O = PlayerOptions.BOT
-GAMES = 1
-BOT_MOVE_DELAY = .5 #Cannot be 0
+GAMES = 1000
+BOT_MOVE_DELAY = 0.01 #Cannot be 0
 LOAD_PRETRAINED = False
 SAVE_TRAINING = False
 
@@ -21,7 +21,7 @@ BOARD_MARGIN = 75
 TOP_MARGIN = 50
 TILE_WIDTH = 150
 LINE_WEIGHT = 2
-TIME_BETWEEN_GAMES = .5 #Cannot be 0
+TIME_BETWEEN_GAMES = 0.01 #Cannot be 0
 
 class Game():
 
@@ -90,6 +90,7 @@ class Game():
         pygame.quit()
 
     def draw(self):
+        
         # Color the screen background
         self._screen.fill((150,240,255))
 
